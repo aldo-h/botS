@@ -11,7 +11,7 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-BOT_TOKEN = "8450913787:AAGFDmWAjUc2XQu_4du6z8p_7KXf1V4FYuM"
+BOT_TOKEN = "8926561880:AAGg3tfEcv2GkHllWrWbWys-KbU8-54tmq8"
 SUPERADMIN_ID = 5592043053
 
 ADMIN_IDS = [
