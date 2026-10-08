@@ -25,7 +25,7 @@ router = Router()
 async def cmd_start(message: Message):
     name = html.escape(message.from_user.first_name or "ученик")
     await message.answer(
-        f"👋 Привет, <b>{name}</b>!\n\n"
+        f"👋 Привет!\n\n"
         "Напиши своё анонимное сообщение, и оно будет передано администрации."
     )
 
