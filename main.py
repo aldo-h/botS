@@ -1,6 +1,8 @@
 import asyncio
 import html
 import logging
+import os
+from aiohttp import web
 
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.client.default import DefaultBotProperties
@@ -9,17 +11,12 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-
 BOT_TOKEN = "8450913787:AAGFDmWAjUc2XQu_4du6z8p_7KXf1V4FYuM"
-
 SUPERADMIN_ID = 5592043053
-
 
 ADMIN_IDS = [
     5592043053,
-    222222222,
 ]
-
 
 router = Router()
 
@@ -38,7 +35,6 @@ async def handle_user_text(message: Message, bot: Bot):
     user = message.from_user
     text = html.escape(message.text)
 
-
     admin_text = f"📩 <b>Новое сообщение:</b>\n\n{text}"
     for admin_id in ADMIN_IDS:
         if admin_id == SUPERADMIN_ID:
@@ -47,7 +43,6 @@ async def handle_user_text(message: Message, bot: Bot):
             await bot.send_message(admin_id, admin_text)
         except TelegramAPIError as e:
             logging.warning("Не удалось отправить админу %s: %s", admin_id, e)
-
 
     username = f"@{user.username}" if user.username else "нет username"
     super_text = (
@@ -65,6 +60,23 @@ async def handle_user_text(message: Message, bot: Bot):
     await message.answer("✅ Ваше сообщение анонимно отправлено администрации.")
 
 
+# --- Заглушка веб-сервера для Render ---
+async def handle_ping(request):
+    return web.Response(text="Bot is alive!")
+
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+
+    # Render передает свой порт через переменную окружения PORT (обычно 10000)
+    port = int(os.environ.get("PORT", 10000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+
+
 async def main():
     logging.basicConfig(level=logging.INFO)
     bot = Bot(
@@ -73,7 +85,12 @@ async def main():
     )
     dp = Dispatcher()
     dp.include_router(router)
-    await dp.start_polling(bot)
+
+
+    await asyncio.gather(
+        start_web_server(),
+        dp.start_polling(bot)
+    )
 
 
 if __name__ == "__main__":
